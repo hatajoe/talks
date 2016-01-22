@@ -1,0 +1,192 @@
+中規模APIサーバー開発で得た知見
+第２回 関西golang勉強会
+21 Jan 2016
+Tags: go, design
+
+Yusuke Hatanaka (a.k.a Hatajoe)
+Software Engineer, Clover Lab.,inc.
+arbalestimp@gmail.com
+https://hatajoe.github.io/blog/
+@Hatajoe
+
+* 中規模？
+
+    $ find . -name "*.go" | wc -l
+    449
+
+    $ find . -name "*.go" | xargs cat | wc -l
+    81114
+
+* 使用している主なパッケージ
+
+.link https://github.com/zenazn/goji zenazn/goji
+.link https://github.com/jinzhu/gorm jinzhu/gorm
+.link https://github.com/gocql/gocql gocql/gocql
+.link https://github.com/garyburd/redigo garyburd/redigo
+.link https://github.com/naoina/migu naoina/migu
+
+これらをラップした内製フレームワークを使用
+
+* 内製フレームワーク
+
+    app
+    ├── common
+    ├── controllers
+    ├── db
+    │   ├── cassandra
+    │   ├── fluentd
+    │   ├── mysql
+    │   ├── redis
+    │   └── seeds
+    ├── env
+    ├── models
+    │   ├── datasource
+    │   ├── master
+    │   └── member
+    ├── service
+    ├── types
+    └── views
+
+* modelsレイヤー
+
+models は以下3パッケージを論理的にまとめたパッケージ
+
+- datasource にスタティックデータ
+- master にマスタデータ構造体(ARっぽいORM)
+- member に会員データ構造体(ARっぽいORM)
+
+* serviceレイヤー
+
+modelsパッケージを引数に取るようなビジネスロジック層
+以下のような使われ方になっている。
+
+    func controller() {
+        m1 := models.GetModel1()
+        m2 := models.GetModel2()
+        r := service.Logic(m1, m2)
+    }
+
+* パッケージ名悩む
+
+パッケージ名について
+
+.link https://blog.golang.org/package-names The Go Blog - Package names
+
+他にもGoのお作法的なものはEffective Goにも色々書いてある
+
+.link https://golang.org/doc/effective_go.html Effective Go
+
+* 完成とは思っていない
+
+- これまでに４度ほどフルスクラッチで書きなおしている
+- 現段階では落ち着いているという程度
+
+* 今日お話する知見
+
+- リクエストのフックはミドルウェア機構で
+- モデルにビジネスロジックを入れない
+- genericsな部分はコード生成で対応
+- map[string]interface{} は避けたい
+
+* リクエストのフックはミドルウェア機構で
+
+.code middleware.go  /^func Logger/,/^}/
+
+.link http://qiita.com/reiki4040/items/a038f1b99e0caee97d3e gojiのMiddlewareの使い方
+.link https://medium.com/@matryer/the-http-handlerfunc-wrapper-technique-in-golang-c60bf76e6124#.2stc82avf The http.HandlerFunc wrapper technique in #golang
+
+* 用途
+
+- アクセスログ
+- リクエストコンテキスト生成
+- 認証
+- etc...
+
+* モデルにビジネスロジックを入れない
+
+.code model.go
+
+* 理由
+
+- 同じレイヤーのパッケージに依存すると循環参照によって詰むことがある
+- コードが重複しやすい
+
+* 解決方法
+
+サービスにインターフェース経由で渡す
+
+.code receiver.go /^type/,/^}/
+
+.code service.go /^func/,/^}/
+
+* 解決方法
+
+- structはあくまでデータとして利用
+- ビジネスロジックはインターフェースで抽象化
+- Receiverを実装した構造体をMember構造体に埋め込むことでコード重複を防ぐ
+
+* genericsが必要な部分はコード生成
+
+    go generate -v ./app/models/...
+
+.code generate.go
+
+* go generate
+
+ファイルの先頭に
+
+    //go:generate gen -f
+    //go:generate margen
+    ...
+
+と書いておくことで、上記であれば gen, margenコマンドが実行される
+
+* gen
+
+.link https://clipperhouse.github.io/gen/ gen (v4)
+
+structのヘッダコメントに
+
+    // +gen...
+
+と書いておくとその構造体のスライス型のパッケージが自動生成される
+
+- First
+- Where
+- Count
+- GroupBy
+
+などの便利メソッドが自動生成されるので便利
+
+* margen
+
+- MySQL Active Record Generator
+- gen inspired なコードジェネレータツール
+- Active Record風なORMを自動生成する
+- 残念ながらprivate repository
+- Cassandra用にcargenというのもある
+
+* map[string]interface{} は避けたい
+
+.code controller.go
+
+* 型の恩恵を受けられない
+
+- reqやresをmap[string]interface{}で受け取ると楽だけど・・・
+- req,resにデータを増やしたり減らしたりするのが結局大変
+- バリデーションも手間
+
+* protocolbuffers, flatbuffers
+
+- サンプル書いた程度なので良さそうとしか言えない
+- pbは遅いらしい
+- fbはシリアライズ、デシリアライズでアロケーションしないので早いらしい
+- クライアントコードも自動生成出来るので型の恩恵を受けられる
+
+* まとめ
+
+- リクエストのフックはミドルウェア機構で
+- モデルにビジネスロジックを入れない
+- genericsな部分はコード生成で対応
+- map[string]interface{} は避けたい
+
