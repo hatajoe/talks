@@ -1,0 +1,241 @@
+GoでGoのプラグインを書く・・けなかった話
+第１回 関西golang勉強会
+12 Oct 2015
+Tags: go, c-shared
+
+Yusuke Hatanaka (a.k.a Hatajoe) 
+Software Engineer, Clover Lab.,inc.
+arbalestimp@gmail.com
+https://hatajoe.github.io/blog/
+@Hatajoe
+
+* -buildmode=c-shared
+
+Goで書いたコードをc shared libraryとしてビルド出来る
+Go 1.5から追加されたビルドモード
+
+.link https://docs.google.com/document/d/1nr-TQHw_er6GOQRsF6T43GGhFDelrAP0NqSS_00RgZQ/edit?pli=1 Go Execution Modes - Google ドキュメント
+
+* c shared library
+
+プログラム実行時に動的にリンクされるライブラリ
+
+e.g,
+
+- .dylib (on OSX)
+- .so (on Linux)
+- .dll (on Windows)
+
+cgoを使うことでGoでも扱うことが出来る
+つまり
+GoでGoのプラグインを書ける？
+
+* Goでshared libraryのシンプルな例
+
+.code plugins/hello/hello.go
+
+* 使ってみる
+
+    ❯ python
+    Python 2.7.8 (default, Nov 18 2014, 00:54:31) 
+    [GCC 4.2.1 Compatible Apple LLVM 5.0 (clang-500.2.79)] on darwin
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import ctypes
+    >>> lib = ctypes.CDLL("./libs/hello.so")
+    >>> Loaded!
+    lib.Hello()
+    Hello!
+    1
+    >>> 
+
+.link http://qiita.com/yanolab/items/1e0dd7fd27f19f697285 Golang で Shared Library を出力する。 - Qiita
+
+* やろうとしてたこと
+
+例えば
+ゲームの場合、ゲームサーバーにリクエストが届く前に色々やりたい場合がある。
+
+e.g, 
+
+- ユーザー認証
+- アプリケーションバージョン確認
+- 購入レシートチェック
+- リクエストプロファイリング
+- メンテナンスモード
+- ...etc
+
+* やろうとしてたこと
+
+ゲーム開発者はゲーム開発に集中したい
+ゲーム以外のことは考えたくない
+
+今はこうなってる
+
+- Nginxとアプリケーションサーバーの間にプロキシサーバーを置いて対応
+- 機能ごとにサーバーがある多段プロキシ
+- 開発環境構築するのが大変
+- 複雑化してきた...orz
+
+* やろうとしてたこと
+
+サーバーじゃなくてプラグインで拡張したい
+
+- プロキシサーバーの各機能をプラグイン拡張出来ると嬉しい
+- 色々な人に機能追加してもらいたい
+
+コアをシンプルにすることで
+理解しやすくメンテナンスしやすいプロダクトになるはず
+
+* 出来れば全部Goで書きたい！
+
+- シンプルで読みやすい
+- テスト書く際のハードルが低い
+- gofmt地味に良い
+
+* http.HandlerFunc wrapper technique
+
+まず最初にプラグインのインターフェースを決める必要があって以下が参考になった 
+
+.link https://medium.com/@matryer/the-http-handlerfunc-wrapper-technique-in-golang-c60bf76e6124 The http.HandlerFunc wrapper technique in #golang — Medium
+
+    func log(fn http.HandlerFunc) http.HandlerFunc {
+        return func(w http.ResponseWriter, r *http.Request) {
+            log.Println("Before")
+            fn(w, r)
+            log.Println("After")
+        }
+    }
+
+    func main() {
+        http.HandleFunc("/", log(func (w http.ResponseWriter, r *http.Request) {
+            fmt.Println("Hello!")    
+        }))
+        http.ListenAndServe(":8080", nil)
+    }
+
+ちなみにhttp.HandlerFuncは以下のような定義になっている
+
+    func HandleFunc(pattern string, handler func(ResponseWriter, *Request))
+
+* プラグイン
+
+つまり
+http.HandlerFuncを引数に取ってhttp.HandlerFuncを返すような関数
+
+    func Plagin(fn http.HandlerFunc) http.HandlerFunc {
+        return func(w http.ResponseWriter, r *http.Request) {
+            fn(w, r)
+        }
+    }
+
+これでHTTPプロキシのプラグイン要件を満たすことが出来る
+
+* ちなみに
+
+Goでプロキシする場合はhttputil.ReverseProxyを使える
+
+	director := func(req *http.Request) {
+		req.URL.Scheme = "http"
+		req.URL.Host = ":8080"
+	}
+	proxy := &httputil.ReverseProxy{Director: director}
+	proxy.ServeHTTP(w, r)
+
+* やってみた
+
+で作り始めたら色々な問題が・・・
+
+* runtime/cgo/gcc_darwin_amd64.cの謎
+
+OS Xでビルドしたshared libraryを使ってみたら
+
+    ~/src/test❯ go run main.go
+    runtime/cgo: could not obtain pthread_keys
+        tried 0x101 0x102 0x103 0x104 0x105 0x106 0x107 0x108 0x109 0x10a 0x10b 0x10c 0x10d 0x10e 0x10f 0x110 0x111 0x112 0x113 0x115 0x116 0x117 0x118 0x119 0x11a 0x11b 0x11c 0x11d 0x11e 0x11f 0x120 0x121 0x122 0x123 0x124 0x125 0x126 0x127 0x128 0x129 0x12a 0x12b 0x12c 0x12d 0x12e 0x12f 0x130 0x131 0x132 0x133 0x134 0x135 0x136 0x137 0x138 0x139 0x13a 0x13b 0x13c 0x13d 0x13e 0x13f 0x140 0x141 0x142 0x143 0x144 0x145 0x146 0x147 0x148 0x149 0x14a 0x14b 0x14c 0x14d 0x14e 0x14f 0x150 0x151 0x152 0x153 0x154 0x155 0x156 0x157 0x158 0x159 0x15a 0x15b 0x15c 0x15d 0x15e 0x15f 0x160 0x161 0x162 0x163 0x164 0x165 0x166 0x167 0x168 0x169 0x16a 0x16b 0x16c 0x16d 0x16e 0x16f 0x170 0x171 0x172 0x173 0x174 0x175 0x176 0x177 0x178 0x179 0x17a 0x17b 0x17c 0x17d 0x17e 0x17f 0x180 0x181
+        signal: abort trap
+
+エラーは [[https://golang.org/src/runtime/cgo/gcc_darwin_amd64.c][src/runtime/cgo/gcc_darwin_amd64.c]] で出力されている
+
+謎のマジックナンバーが・・・
+
+    #define magic1 (0x23581321345589ULL)
+
+何かのオフセットになっている模様・・・
+
+    pthread_setspecific(k, (void*)magic1);
+    asm volatile("movq %%gs:0x8a0, %0" : "=r"(x));
+    pthread_setspecific(k, 0);
+
+* ((((；ﾟДﾟ))))ｶﾞｸｶﾞｸﾌﾞﾙﾌﾞﾙ
+
+* golang-nutsに聞いてみた
+
+.link https://groups.google.com/forum/#!topic/golang-nuts/Vy8r05reLyw How can I do to fix `runtime/cgo: could not obtain pthread_keys' on darwin/amd64 - Google グループ
+
+要約すると、
+Darwin環境ではスタティックにリンクする際、
+ランタイムがpthread keysと同じメモリ領域を確保しようとしてしまうため
+確保するメモリ領域をオフセットによってずらしているらしい
+
+彼いわく
+
+    This is a truly horrible hack, but it 
+    works well enough when linking statically. 
+
+* golang-nutsに聞いてみた
+
+＿人人人人人人人人人人人人＿
+＞　本当に恐ろしいハック　＜
+￣Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y￣
+
+* golang-nutsに聞いてみた
+
+そのため
+GoプログラムとGoでビルドしたshared libraryは
+同じpthread keyを確保してしまうらしい
+
+取り敢えず
+OS X(Darwin/amd64)環境ではshared libraryはビルド出来ないことがわかった
+
+(ちなみにLinux/amd64環境であればビルド可能)
+
+* Go type not supported in export
+
+次に
+linux/amd64環境にてhttp.HandlerFuncをexportするコードを
+shared libraryとしてビルドしたところ以下のエラーが発生
+
+     Go type not supported in export: http.HandlerFunc
+
+ʕ◔ϖ◔ʔ
+
+* そもそもunsupportedやん
+
+め、めっちゃわかりやすいエラーメッセージ...orz
+一応、golang-nutsで聞いてみた
+
+    Sorry.  We do not yet support building Go code into a plugin that can 
+    be opened by a Go program
+
+* そもそもunsupported
+
+＿人人人人人人＿
+＞　ごめんね　＜
+￣Y^Y^Y^Y^Y￣
+
+* 悪あがき
+
+ポインタなら渡してデリファレンス出来るんじゃ・・？
+
+    2015/10/11 20:36:10 &i: (*int)(0xc82000a2e0)
+    2015/10/11 20:36:10 *i: (*int)(0x7f1700000001)
+
+渡すことは出来たが呼び出し元と呼びだされた側でアドレスが違う・・・ʕ◔ϖ◔ʔ
+
+* まとめ
+
+- golang-nutsすごい
+- Cとか使ってる人ならGoでshared lib書けるので楽かも
+- 今後に期待したい
+
+Dear @hnakamur2さん、Twitter上で色々アドバイスを頂きありがとうございます!!
