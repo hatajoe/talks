@@ -1,0 +1,251 @@
+dev-cloverlab/carpenter
+DevFest Kansai 2016
+27 Nov 2016
+Tags: go, carpenter, migration,
+
+Yusuke Hatanaka (a.k.a hatajoe)
+Software Engineer, Clover Lab.,inc.
+arbalestimp@gmail.com
+https://hatajoe.github.io/blog/
+@Hatajoe
+
+- 自己紹介
+- 今日話す内容
+    - ソシャゲのDBマイグレーションの話
+- 個人的に感じるDBマイグレーションのツラさ
+    - upとdownの漏れ
+    - バージョンをまたぐ時の無駄
+    - データの準備
+- naoina/migu
+    - Goのstructとテーブルの差分からSQLを実行
+- 差分
+    - CREATE,DROP,ALTERをいい感じに実行してくれる
+    - upとdown書かなくても良い
+    - バージョンをまたぐ時も無駄が無い
+    - index対応その他をクソコードで魔改造したフォーク版はコチラ hatajoe/migu 
+    - データも差分管理したい
+- carpenter（privateレポジトリ版）
+    - CSVとテーブルの差分からSQLを発行
+    - migu + carpenter でブランチごとに環境を再現しやすくなった
+- これまでの開発フロー
+    - サーバーはPHP製
+    - しかもDBマイグレーションの自動化はして無かった
+    - チームで共通のDBサーバーを企画とプログラマが皆でいじる
+    - リリース時にいじったとこだけ本番に反映
+    - ミスる
+    - 環境ごとに差分が出来る
+- migu + carpenter
+    - サーバーはGo製
+    - DBマイグレーションはAnsible+Jenkinsで自動化
+    - プログラマは手元にDBも含めて開発環境をまるっと
+    - 企画にはCSVをgitに入れてもらう
+    - リリースは自動
+    - 環境ごとの差分も無い
+- ところが
+- 新規プロジェクト始動
+    - 僕異動
+    - 異動先のPJはトラディショナルなストロングスタイル
+    - もちろんPHP
+    - miguが使えない
+    - ／(^o^)＼
+- dev-cloverlab/carpenter（publicレポジトリ版）
+    - design
+    - build
+    - export
+    - import
+- Demo
+- 開発フロー
+    - 開発時は誰でも自由にDB触ってくれ
+    - carpenterで構造とCSVを抜き出してレポジトリにコミット
+    - QA環境その他に自動でリリース
+    - PHPだろうとGoだろうとMySQLであれば大丈夫
+    - Windowsでも問題無く動く
+- 今後
+    - パーティション対応
+    - テストの拡充
+- ご清聴ありがとうございました
+
+
+
+
+* 中規模？
+
+    $ find . -name "*.go" | wc -l
+    449
+
+    $ find . -name "*.go" | xargs cat | wc -l
+    81114
+
+* 使用している主なパッケージ
+
+.link https://github.com/zenazn/goji zenazn/goji
+.link https://github.com/jinzhu/gorm jinzhu/gorm
+.link https://github.com/gocql/gocql gocql/gocql
+.link https://github.com/garyburd/redigo garyburd/redigo
+.link https://github.com/naoina/migu naoina/migu
+
+これらをラップした内製フレームワークを使用
+
+* 内製フレームワーク
+
+    app
+    ├── common
+    ├── controllers
+    ├── db
+    │   ├── cassandra
+    │   ├── fluentd
+    │   ├── mysql
+    │   ├── redis
+    │   └── seeds
+    ├── env
+    ├── models
+    │   ├── datasource
+    │   ├── master
+    │   └── member
+    ├── service
+    ├── types
+    └── views
+
+* modelsレイヤー
+
+models は以下3パッケージを論理的にまとめたパッケージ
+
+- datasource にスタティックデータ
+- master にマスタデータ構造体(ARっぽいORM)
+- member に会員データ構造体(ARっぽいORM)
+
+* serviceレイヤー
+
+modelsパッケージを引数に取るようなビジネスロジック層
+以下のような使われ方になっている。
+
+    func controller() {
+        m1 := models.GetModel1()
+        m2 := models.GetModel2()
+        r := service.Logic(m1, m2)
+    }
+
+* パッケージ名悩む
+
+パッケージ名について
+
+.link https://blog.golang.org/package-names The Go Blog - Package names
+
+他にもGoのお作法的なものはEffective Goにも色々書いてある
+
+.link https://golang.org/doc/effective_go.html Effective Go
+
+* 完成とは思っていない
+
+- これまでに４度ほどフルスクラッチで書きなおしている
+- 現段階では落ち着いているという程度
+
+* 今日お話する知見
+
+- リクエストのフックはミドルウェア機構で
+- モデルにビジネスロジックを入れない
+- genericsな部分はコード生成で対応
+- map[string]interface{} は避けたい
+
+* リクエストのフックはミドルウェア機構で
+
+.code middleware.go  /^func Logger/,/^}/
+
+.link http://qiita.com/reiki4040/items/a038f1b99e0caee97d3e gojiのMiddlewareの使い方
+.link https://medium.com/@matryer/the-http-handlerfunc-wrapper-technique-in-golang-c60bf76e6124#.2stc82avf The http.HandlerFunc wrapper technique in #golang
+
+* 用途
+
+- アクセスログ
+- リクエストコンテキスト生成
+- 認証
+- etc...
+
+* モデルにビジネスロジックを入れない
+
+.code model.go
+
+* 理由
+
+- 同じレイヤーのパッケージに依存すると循環参照によって詰むことがある
+- コードが重複しやすい
+
+* 解決方法
+
+サービスにインターフェース経由で渡す
+
+.code receiver.go /^type/,/^}/
+
+.code service.go /^func/,/^}/
+
+* 解決方法
+
+- structはあくまでデータとして利用
+- ビジネスロジックはインターフェースで抽象化
+- Receiverを実装した構造体をMember構造体に埋め込むことでコード重複を防ぐ
+
+* genericsが必要な部分はコード生成
+
+    go generate -v ./app/models/...
+
+.code generate.go
+
+* go generate
+
+ファイルの先頭に
+
+    //go:generate gen -f
+    //go:generate margen
+    ...
+
+と書いておくことで、上記であれば gen, margenコマンドが実行される
+
+* gen
+
+.link https://clipperhouse.github.io/gen/ gen (v4)
+
+structのヘッダコメントに
+
+    // +gen...
+
+と書いておくとその構造体のスライス型のパッケージが自動生成される
+
+- First
+- Where
+- Count
+- GroupBy
+
+などの便利メソッドが自動生成されるので便利
+
+* margen
+
+- MySQL Active Record Generator
+- gen inspired なコードジェネレータツール
+- Active Record風なORMを自動生成する
+- 残念ながらprivate repository
+- Cassandra用にcargenというのもある
+
+* map[string]interface{} は避けたい
+
+.code controller.go
+
+* 型の恩恵を受けられない
+
+- reqやresをmap[string]interface{}で受け取ると楽だけど・・・
+- req,resにデータを増やしたり減らしたりするのが結局大変
+- バリデーションも手間
+
+* protocolbuffers, flatbuffers
+
+- サンプル書いた程度なので良さそうとしか言えない
+- pbは遅いらしい
+- fbはシリアライズ、デシリアライズでアロケーションしないので早いらしい
+- クライアントコードも自動生成出来るので型の恩恵を受けられる
+
+* まとめ
+
+- リクエストのフックはミドルウェア機構で
+- モデルにビジネスロジックを入れない
+- genericsな部分はコード生成で対応
+- map[string]interface{} は避けたい
+
