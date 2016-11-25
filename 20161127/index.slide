@@ -1,0 +1,110 @@
+dev-cloverlab/carpenter
+DevFest Kansai 2016
+27 Nov 2016
+Tags: go, carpenter, migration,
+
+Yusuke Hatanaka (a.k.a hatajoe)
+Software Engineer, Clover Lab.,inc.
+arbalestimp@gmail.com
+https://hatajoe.github.io/blog/
+@hatajoe
+
+* 僕
+
+.image karaage.png
+
+* クローバーラボ
+
+.image yurudora.png
+
+* ソシャゲのDBマイグレーションの話
+
+* 個人的に感じるDBマイグレーションのツラさ
+
+- upとdownの漏れ
+- バージョンをまたぐ時の無駄
+- データの準備
+
+* naoina/migu
+
+Goのstructとテーブルの差分からSQLを実行
+
+    type Member struct {
+        ID    int
+        Name  string
+        Email string
+    }
+
+を定義して
+
+    migu sync -h127.0.0.1:3306 -uroot -ppassword test member.go
+
+.image migu.png
+
+* 差分
+  
+- CREATE,DROP,ALTERをいい感じに実行してくれる
+- upとdown書かなくても良い
+- バージョンをまたぐ時も無駄が無い
+- index対応その他をクソコードで魔改造したフォーク版はコチラ hatajoe/migu 
+- でもデータも差分管理したい
+
+* carpenter
+
+* carpenter （privateレポジトリ版）
+  
+- CSVとテーブルの差分からSQLを発行
+- migu + carpenter でブランチごとに環境を再現しやすくなった
+
+* これまでの開発フロー
+  
+- サーバーはPHP製
+- DBマイグレーションの自動化はして無かった
+- チームで共通のDBサーバーを企画とプログラマが皆でいじる
+- リリース時にいじったとこだけ本番に反映
+- ミスる
+- 環境ごとに差分が出来る
+
+* migu + carpenter
+  
+- サーバーはGo製
+- DBマイグレーションはAnsible+Jenkinsで自動化
+- プログラマは手元にDBも含めて開発環境をまるっと
+- 企画にはCSVをgitに入れてもらう
+- リリースは自動
+- 環境ごとの差分も無い
+
+* ところが
+
+* 新規プロジェクト始動
+
+- 僕異動
+- 異動先のPJはトラディショナルなストロングスタイル
+- もちろんPHP
+- miguが使えない
+- ／(^o^)＼
+
+* dev-cloverlab/carpenter
+
+* carpenter （publicレポジトリ版）
+
+- design
+- build
+- export
+- import
+
+* Demo
+
+* 開発フロー
+  
+- 開発時は誰でも自由にDB触ってくれ
+- carpenterで構造とCSVを抜き出してレポジトリにコミット
+- QA環境その他に自動でリリース
+- PHPだろうとGoだろうとMySQLであれば大丈夫
+- Windowsでも問題無く動く
+
+* 今後
+
+- パーティション対応
+- テストの拡充
+   
