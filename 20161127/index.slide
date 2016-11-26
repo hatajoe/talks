@@ -3,108 +3,177 @@ DevFest Kansai 2016
 27 Nov 2016
 Tags: go, carpenter, migration,
 
-Yusuke Hatanaka (a.k.a hatajoe)
-Software Engineer, Clover Lab.,inc.
-arbalestimp@gmail.com
-https://hatajoe.github.io/blog/
+Yusuke Hatanaka
 @hatajoe
 
-* 僕
+* me
 
-.image karaage.png
+.link https://twitter.com/hatajoe @hatajoe
 
-* クローバーラボ
+.image karaage-gopher.png
 
-.image yurudora.png
+* working at Clover Lab.,inc.
 
-* ソシャゲのDBマイグレーションの話
+.image yurudora-ss.png
 
-* 個人的に感じるDBマイグレーションのツラさ
+* outline
 
-- upとdownの漏れ
-- バージョンをまたぐ時の無駄
-- データの準備
+- What is carpenter?
+- 4 subcommands
+- Demo
+- Workflow
+- From now on
 
-* naoina/migu
+slide is here: [[https://github.com/hatajoe/kug2][github.com/hatajoe/kug2]]
 
-Goのstructとテーブルの差分からSQLを実行
+* What is carpenter
 
-    type Member struct {
-        ID    int
-        Name  string
-        Email string
-    }
+* Carpenter is tool to manage DB schema and data
 
-を定義して
+- [[https://github.com/dev-cloverlab/carpenter][github.com/dev-cloverlab/carpenter]]
+- wiritten in Go 🎉
+- inspired by [[https://github.com/naoina/migu][github.com/naoina/migu]] 🙏
+- However, migu can only be used with Go product...
 
-    migu sync -h127.0.0.1:3306 -uroot -ppassword test member.go
+* Background
 
-.image migu.png
+- DB migration is too bother
+- up.sql and down.sql 😓
+- crossing versions 😩
+- small fix 😵
+- I just want to reproduce the state of the git branch 😡
+- I made carpenter to solve them
 
-* 差分
-  
-- CREATE,DROP,ALTERをいい感じに実行してくれる
-- upとdown書かなくても良い
-- バージョンをまたぐ時も無駄が無い
-- index対応その他をクソコードで魔改造したフォーク版はコチラ hatajoe/migu 
-- でもデータも差分管理したい
-
-* carpenter
-
-* carpenter （privateレポジトリ版）
-  
-- CSVとテーブルの差分からSQLを発行
-- migu + carpenter でブランチごとに環境を再現しやすくなった
-
-* これまでの開発フロー
-  
-- サーバーはPHP製
-- DBマイグレーションの自動化はして無かった
-- チームで共通のDBサーバーを企画とプログラマが皆でいじる
-- リリース時にいじったとこだけ本番に反映
-- ミスる
-- 環境ごとに差分が出来る
-
-* migu + carpenter
-  
-- サーバーはGo製
-- DBマイグレーションはAnsible+Jenkinsで自動化
-- プログラマは手元にDBも含めて開発環境をまるっと
-- 企画にはCSVをgitに入れてもらう
-- リリースは自動
-- 環境ごとの差分も無い
-
-* ところが
-
-* 新規プロジェクト始動
-
-- 僕異動
-- 異動先のPJはトラディショナルなストロングスタイル
-- もちろんPHP
-- miguが使えない
-- ／(^o^)＼
-
-* dev-cloverlab/carpenter
-
-* carpenter （publicレポジトリ版）
+* 4 subcommands
 
 - design
-- build
 - export
+- build
 - import
+
+* design
+
+- export table structure as JSON formatted string
+- [[https://github.com/dev-cloverlab/carpenter/blob/master/dialect/mysql/table.go#L111][carpenter/dialect/mysql/table.go]]
+- [[https://github.com/dev-cloverlab/carpenter/blob/master/dialect/mysql/column.go#L165][carpenter/dialect/mysql/column.go]]
+- [[https://github.com/dev-cloverlab/carpenter/blob/master/dialect/mysql/index.go#L153][carpenter/dialect/mysql/index.go]]
+
+    select * from information_schema.tables where TABLE_SCHEMA=%s
+    select * from information_schema.columns where TABLE_SCHEMA="%s
+    show index from `%s`
+
+* build
+
+- build table schema from exported JSON
+- 💡 make SQL from difference between current table structure and JSON
+- [[https://github.com/dev-cloverlab/carpenter/blob/master/builder/builder.go#L11][carpenter/builder/builder.go]] 
+
+    CREATE
+    DROP
+    ALTER
+
+support also to index of course 👍
+
+* export
+
+- export table data as CSV files
+- only the tables that match the regexp like:
+
+    % carpenter export -r "^master_.*$" -d ./csv
+
+* import
+
+- reflect CSV files to tables
+- 💡 make SQL from difference between current table data and CSV
+- [[https://github.com/dev-cloverlab/carpenter/blob/master/seeder/seeder.go#L15][carpenter/seeder/seeder.go]]
+
+    TRUNCATE
+    REPLACE
+    INSERT
+
+UPDATE or REPLACE: REPLACE can update multiple records at once, UPDATE can not
 
 * Demo
 
-* 開発フロー
-  
-- 開発時は誰でも自由にDB触ってくれ
-- carpenterで構造とCSVを抜き出してレポジトリにコミット
-- QA環境その他に自動でリリース
-- PHPだろうとGoだろうとMySQLであれば大丈夫
-- Windowsでも問題無く動く
+* install
 
-* 今後
+for Mac users
 
-- パーティション対応
-- テストの拡充
-   
+    % brew tap dev-cloverlab/carpenter
+    % brew install carpenter
+
+for Others
+
+.link https://github.com/dev-cloverlab/carpenter/releases
+
+for Gophers
+
+    % go get github.com/dev-cloverlab/carpenter/cmd/carpenter
+
+* memo
+
+    % cd /tmp && mkdir {json,csv}
+    % brew services start mysql
+
+design
+
+    % carpenter -vv -s test -d "root@tcp(127.0.0.1:3306)" design > ./json/structure.json
+
+build
+
+    % carpenter -vv -s hatajoe -d "root@tcp(127.0.0.1:3306)" build -d ./json
+
+export
+
+    % carpenter -vv -s test -d "root@tcp(127.0.0.1:3306)" export -d ./csv
+
+import
+
+    % carpenter -vv -s hatajoe -d "root@tcp(127.0.0.1:3306)" import -d ./csv
+
+* Workflow (at social game development)
+
+* A while ago
+
+- 🐴 Good old days traditional style
+- 👽 DB migration depends on their own brain memory
+- ❌ can not see the difference
+
+
+* With carpenter
+
+Engineer
+
+- 📖 designing DB with any tools (e.g, Sequel Pro, PhpMyAdmin..)
+- ✎ write code
+
+    % carpenter design
+
+- 🍺 commit code and JSON to reporitory and push remote
+- 👨 deploy using Jenkins
+
+    % carpenter build
+    % carpenter import
+
+* With carpenter
+
+Planner
+
+- 😁 adjust the data in the QA environment with any tools
+
+    % carpenter export
+
+- 🍺 commit CSV to repository and push remote
+- 👨 deploy using Jenkins
+
+    % carpenter build
+    % carpenter import
+
+* From now on
+
+* maybe...
+
+- partition support
+- release automation
+- more tests
+
