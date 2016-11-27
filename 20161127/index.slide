@@ -34,6 +34,7 @@ slide is here: [[http://go-talks.appspot.com/github.com/hatajoe/kug2/20161127/in
 - wiritten in Go 🎉
 - inspired by [[https://github.com/naoina/migu][github.com/naoina/migu]] 🙏
 - However, migu can only be used with Go product...
+- MySQL only
 
 * Background
 
@@ -88,6 +89,7 @@ support also to index of course 👍
 - [[https://github.com/dev-cloverlab/carpenter/blob/master/seeder/seeder.go#L15][carpenter/seeder/seeder.go]]
 
     TRUNCATE
+    DELETE
     REPLACE
     INSERT
 
