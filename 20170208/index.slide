@@ -1,0 +1,414 @@
+GoによるAPI開発と使い所
+ゲーム開発の【ごっついい感じ】ビヨンド勉強会 #7
+8 Feb 2017
+Tags: go, API
+
+Yusuke Hatanaka
+@hatajoe
+
+* me
+
+[[https://twitter.com/hatajoe][@hatajoe]]
+[[https://kug2.connpass.com/][#kug2]]
+[[https://gglt.connpass.com/][#gglt]]
+
+* working at Clover Lab.,inc.
+
+.image yurudora-ss.png
+
+* outline
+
+- ソーシャルゲームのAPI 2min
+- Go 5min
+- Go導入時に気をつけたいこと 6min
+- 以上を踏まえた使い所 10min
+- 設計やテストの話 10min
+
+* ソーシャルゲームのAPI
+
+* HTMLからネイティブへ
+
+* ソーシャルゲームのAPI
+
+- サーバーサイドでレンダリングする必要が無くなった
+- PHPである必要が無くなった
+
+* 開発チームは小規模から大規模へ
+
+- エンジニア1~3名から4~6名に
+- サーバー・クライアントの分業化
+- I/Fをかっちりしたくなる
+
+* Go
+
+* Go
+
+- 静的型付言語
+- シンプルなシンタックス
+- 便利なツールたち
+- 豊富な標準パッケージ
+- マルチプラットフォーム
+- 並行処理
+
+* 静的型付言語
+
+- 開発の規模が大きくなると型の恩恵も大きくなる
+- クライアントとI/Fを合わせるために変更が多い
+- こういった変更は型があると安心感が違う
+
+* 静的型付言語
+
+    // Go
+    type Response struct {
+        ID    int64
+        name  string
+        email string
+    }
+
+    // PHP
+    class Response {
+        public $id;
+        public $name;
+        public $email;
+    }
+
+- 実際はもっと複雑
+- 変数の追加削除、変数名の変更はすべてコンパイルエラーに
+- 例えPHPだとしても型を作った方が楽。ただし変更はしんどい。
+
+* シンプルなシンタックス
+
+- bnf記法で130数行らしい
+    ちなみに・・
+    PHP     690行程度
+    Python  400行程度
+    Ruby    300行程度
+    だそうです。
+
+- 誰が書いても大体同じようなコードになる
+- トリッキーな書き方は出来ない。愚直に書く。
+
+* シンプルなシンタックス
+
+if文
+
+    package main
+
+    import "fmt"
+
+    func main() {
+        a := 1
+
+        // if-else
+        if a > 0 {
+            fmt.Println("expected")
+        } else {
+            fmt.Println("unexpected")
+        }
+
+        // こんな書き方も。errはこのifブロック内のスコープとして扱われる
+        if err := someDanger(); err != nil {
+            fmt.Println(err.Error())
+        }
+    }
+
+
+* シンプルなシンタックス
+
+for文 (while文は存在しない)
+
+    package main
+
+    import "fmt"
+
+    func main() {
+        // 10回ループ
+        for $i := 0; $i < 10; $i++ {
+            fmt.Println("Hello")
+        }
+
+        // 無限ループ
+        for {
+            fmt.Println("Hello")
+        }
+
+        // foreach的な
+        li := []int{1 ,2, 3, 4}
+        for k, v := range li {
+            fmt.Printf("%d => %d\n", $k, $v)
+        }
+    }
+
+
+* シンプルなシンタックス
+
+switch文
+
+    package main
+
+    import "fmt"
+
+    func main() {
+        a := "foo"
+
+        // switch文にbreakは必要ない
+        switch a {
+        case "foo":
+            fmt.Println("foo")
+        case "bar":
+            fmt.Println("bar")
+        default:
+            fmt.Println("baz")
+        }
+    }
+
+
+* シンプルなシンタックス
+
+構造体とメソッド
+
+    package foo
+
+    type Foo struct {
+        ID  int64  // publicフィールドは最初が大文字
+        key string // privateフィールドは最初が小文字
+    }
+
+    // privateメソッドは最初が小文字
+    func (m Foo) translateKey() string {
+        return key + "fookey"
+    }
+
+    // publicメソッドは最初が大文字
+    func (m Foo) GetKey() string {
+        return m.translateKey()
+    }
+
+    // フィールドを更新したい場合はポインタレシーバーにする（*の部分）
+    func (m *Foo) SetKey(k string) {
+       m.key = k
+    }
+
+
+* 便利なツールたち
+
+- [[https://godoc.org/golang.org/x/tools][golang.org/x/tools]] にたくさん
+- gofmt
+- goimports
+- ..etc
+
+* gofmt
+
+- コマンド一発でコードを整形
+    インデント
+    スペース
+    改行
+    ..etc
+
+- エディタと連携して保存時にフォーマットするのが基本
+- あるいは最後のコミットでフォーマットするのもお洒落。知らんけど。
+
+* goimports
+
+- コマンド一発で使用・未使用パッケージを解決
+- demo
+
+* 豊富な標準パッケージ
+
+- 大抵のことは標準でまかなえるので依存パッケージが少なくて済む
+- 特にnet/httpはお世話になるはず
+- その他のパッケージはGitHubなどのホスティングサービスから取得
+
+    % go get github.com/go-sql-driver/mysql
+
+* マルチプラットフォーム
+
+- 様々な環境向けにクロスコンパイルが可能
+- Macで作ったツールをWindowsで動かしたり
+
+    % GOOS=windows GOARCH=amd64 go build .
+
+- [[https://github.com/mitchellh/gox][github.com/mitchellh/gox]] が便利
+
+* 並行処理
+
+- 並列処理を言語がサポートしている
+- 複雑な排他処理もチャンネルを使うことでシンプルに
+
+* 並行処理
+
+    package main
+
+    import (
+    	"fmt"
+    	"sync"
+    )
+
+    // func mainはmain goroutine
+    func main() {
+    	count := 0
+    	inc := make(chan int)
+    	dec := make(chan int)
+    	end := make(chan bool)
+    	wg := sync.WaitGroup{}
+
+* 並行処理
+
+    	// go で新しいgoroutine生成
+    	wg.Add(1)
+    	go func() {
+    		// 以下はmain goroutineとは非同期的に処理される
+    		for i := 0; i < 10; i++ {
+    			inc <- i
+    		}
+    		wg.Done()
+    	}()
+
+    	wg.Add(1)
+    	go func() {
+    		for i := 0; i < 10; i++ {
+    			dec <- i
+    		}
+    		wg.Done()
+    	}()
+
+    	go func() {
+    		wg.Wait()
+    		end <- true
+    	}()
+
+* 並行処理
+
+    LOOP:
+    	for {
+    		select {
+    		case i := <-inc:
+    			count += i
+    			fmt.Println("inc: ", count)
+    		case d := <-dec:
+    			count -= d
+    			fmt.Println("dec: ", count)
+    		case <-end:
+    			break LOOP
+    		}
+    	}
+
+    	fmt.Println("result: ", count)
+    }
+
+* Go導入時に気をつけたいこと
+
+* Go導入時に気をつけたいこと
+
+- デプロイ環境を先に整える
+- ロギング環境を先に整える
+- サーバー構成に気をつける
+- ロードアベレージに気をつける
+- コードの自動生成に気をつける
+- Web APIを実装する分には速さを特に感じない
+
+ワンダークラウンはゲームAPIから管理画面、公式サイトまでバックエンドは全てGo製
+
+* デプロイ環境を先に整える
+
+- コンパイルが必要
+- 開発中はコンパイルして転送を幾度となく繰り返すので自動化
+- Jenkins + Ansible
+
+* ロギング環境を先に整える
+
+- ちょっとログ出したいと思ってもコンパイルして転送が必要
+- エラーハンドリングとnilチェックは手を抜かない
+- fluentd + Elasticsearch + kibana
+
+* サーバー構成に気をつける
+
+- Goで実装したサーバーをデーモン化するために工夫が必要
+- Nginx + supervisord
+
+* ロードアベレージに気をつける
+
+- GoはデフォルトだとプロセスをCPU数以上作らない
+- そのため基本的にはロードアベレージはCPU数以上にならない
+- runtimeが軽量スレッド（goroutine）を生成してマルチコアを使い切ってくれる
+- 外形監視などを使ってレスポンスタイムを見るのが確実
+- mackerel
+
+* コードの自動生成に気をつける
+
+- ORMなど違う型で同じコードは大量に出来る
+- リフレクションは使えるが遅い
+- go generate
+
+* Web APIを実装する分には速さを特に感じない
+
+- 結局はI/Oがほとんど
+- PHPでもCodeIgniterなど速いFWはある
+- ブートストラップのコストを省けるという点はある
+
+* 以上を踏まえた使い所
+
+* Goを使うと良さそう
+
+- マイクロサービス化
+- CLIツール
+- リアルタイム系サーバー
+
+* マイクロサービス化 2min
+
+- 頻繁に更新しない部分を抜き出してミドルウェア化
+- 速度の恩恵がある
+- ユーザー認証
+- レシート認証
+- バージョンチェック
+- メンテナンス判定
+- ...etc
+
+* CLIツール
+
+- コード生成ツール
+- マイグレーションツール
+- [[https://github.com/dev-cloverlab/carpenter][dev-cloverlab/carpenter: Carpenter is a tool to manage DB schema and data]]
+- マスターデータのチェックツール
+- その他なんでも
+- CLIツールはGoで作らない理由はあまり無いと思う
+
+* リアルタイム系サーバー
+
+- WebSocketなどでデータをブロードキャストするようなものとかすぐに作れる
+- [[https://github.com/hatajoe/go-websocket-json-broadcaster][hatajoe/go-websocket-json-broadcaster]]
+- ただしまだプロダクション利用はしたことが無い
+
+* Goじゃなくても良さそう
+
+- ゲームAPI
+- 管理画面
+
+* ゲームAPI 3min
+
+- 仕様変更が多い
+- 運営時に頻繁に更新する
+- 運営時のコードベースだとコンパイルに1分程度かかったりする
+- うちの場合だとビルドとマイグレーションは常にセットだったので結構かかったり
+- この蓄積が割りと無視できなくなってくる
+
+* 管理画面
+
+- SPAと割り切ればアリ
+- GoのAPIを叩いて結果をHTMLにするようなものをLL言語で書いた方が楽
+- とは言え、モデル層が使いまわせなくなるのでそれはそれでツライ
+
+* 設計やテストの話
+
+* 設計やテストの話
+
+- 全リクエストで共通の処理はミドルウェアとして切り出す（あるいはまったく別のプロジェクトとして）
+- ユーザーごとのキーデータや現在時刻、動作環境フラグなどは全てcontextに詰めるとデバッグが楽
+- データに振る舞いを持たせない方がコードの再利用が出来て良い
+    - 構造体にビジネスロジックを持ったメソッドを作るより、それ用のパッケージを切ってインターフェース受け取るようにすると良い
+    - ただしエディタで追いづらくなるけど
+    - Goの場合はインターフェースの実装を後付け出来るので最初は普通に実装しておいても良いかも
+- net/httpのテストはnet/httptestで簡単に出来る
+- 自動テストはgo testで簡単に書ける。net/httptestを使ったE2Eテストだけでも書いておくと良い
+    - 結果的にはロジックをパッケージに切り出してそいつをテスト出来れば良かったことに気づく
+
