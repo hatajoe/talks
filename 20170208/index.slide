@@ -604,7 +604,7 @@ Goに限った話ではないかもしれない
 
 * ユニットテスト例
 
-    package tmp
+    package math
 
     func Add(a, b int) int {
     	return a + b
@@ -612,10 +612,10 @@ Goに限った話ではないかもしれない
 
 * ユニットテスト例
 
-    package tmp_test
+    package math_test
 
     import "testing"
-    import "../tmp"
+    import "github.com/hatajoe/beyond7/math"
 
     func TestAdd(t *testing.T) {
     	cases := []struct {
@@ -630,7 +630,7 @@ Goに限った話ではないかもしれない
     	}
 
     	for _, c := range cases {
-    		if res := tmp.Add(c.value1, c.value2); res != c.expect {
+    		if res := math.Add(c.value1, c.value2); res != c.expect {
     			t.Errorf("err: expect %d, actual %d\n", c.expect, res)
     		}
     	}
@@ -662,7 +662,7 @@ Goに限った話ではないかもしれない
         }
     }
 
-参考URL: http://qiita.com/ttyokoyama/items/61adfac5144cf300553f
+参考URL: [[http://qiita.com/ttyokoyama/items/61adfac5144cf300553f]]
 
 * ご静聴ありがとうございました
 
