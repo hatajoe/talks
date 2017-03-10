@@ -1,0 +1,143 @@
+/**
+ * Cloverlab theme for reveal.js.
+ *
+ * Copyright (C) 2015 Shibukk, http://shibukk.io
+ */
+
+
+// Default mixins and settings -----------------
+@import "../template/mixins";
+@import "../template/settings";
+// ---------------------------------------------
+
+
+// Include theme-specific fonts
+@import url(../../lib/font/SourceHanSansJP/SourceHanSansJP.css);
+@import url(../../lib/font/Quicksand/Quicksand.css);
+
+// Override theme settings (see ../template/settings.scss)
+$color1: #FEF5E2;
+$color2: #9FBA13;
+$color3: #45413C;
+
+$backgroundColor: $color2;
+$mainColor: $color3;
+$headingColor: $color1;
+
+$mainFontSize: 40px;
+$mainFont: "SourceHanSansJP-Heavy", Helvetica, sans-serif;
+$headingFont: "SourceHanSansJP-Heavy", Helvetica, sans-serif;
+$alphanumericFont: "Quicksand-Bold", Helvetica, sans-serif;
+$headingTextShadow: none;
+$headingLetterSpacing: normal;
+$headingTextTransform: none;
+$linkColor: $color3;
+$linkColorHover: lighten( $linkColor, 10% );
+$selectionBackgroundColor: lighten( $linkColor, 25% );
+
+$heading1Size: 2.6em;
+$heading2Size: 1.7em;
+$heading3Size: 1.4em;
+$heading4Size: 1.1em;
+$heading5Size: 1.0em;
+$heading6Size: 0.8em;
+
+.reveal {
+  em {
+    font-family: $alphanumericFont;
+    font-style: normal !important;
+    font-size: 120%;
+  }
+  strong {
+    color: $color2;
+  }
+  ul {
+    line-height: 90px;
+  }
+  section img {
+    margin: 0px !important;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+}
+
+.has-green-background {
+  &.reveal {
+    background-image: url("../../lib/image/bg1.png");
+    background-repeat: no-repeat;
+    background-position: 105% -10%;
+    background-size: 470px 470px;
+    background-color: $color2;
+  }
+  section {
+    &, h1, h2, h3, h4, h5, h6 {
+      color: $color1;
+    }
+    strong {
+      color: $color2;
+    }
+  }
+  #footer {
+    @extend #footer;
+    display: block !important;
+  }
+}
+
+.has-light-background {
+  &.reveal {
+    background-image: url("../../lib/image/bg2.png");
+    background-repeat: no-repeat;
+    background-position: 105% -10%;
+    background-size: 470px 470px;
+    background-color: $color1;
+  }
+  section {
+    &, h1, h2, h3, h4, h5, h6 {
+      color: $color3;
+    }
+    strong {
+      color: $color2;
+    }
+  }
+  #footer {
+    @extend #footer;
+    display: block !important;
+  }
+}
+
+.has-dark-background {
+  &.reveal {
+    background-image: url("../../lib/image/bg3.png");
+    background-repeat: no-repeat;
+    background-position: 105% -10%;
+    background-size: 470px 470px;
+    background-color: $color3;
+  }
+  section {
+    &, h1, h2, h3, h4, h5, h6 {
+      color: $color1;
+    }
+    strong {
+      color: $color2;
+    }
+  }
+  #footer {
+    @extend #footer;
+    display: block !important;
+  }
+}
+
+#footer {
+  font-family: $alphanumericFont;
+  font-size: 0.9rem;
+  color: #8a8783;
+  display: none;
+  position: absolute;
+  left: 33%;
+  bottom: 1em;
+}
+
+// Theme template ------------------------------
+@import "../template/theme";
+// ---------------------------------------------

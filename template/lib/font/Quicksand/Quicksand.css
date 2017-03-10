@@ -1,0 +1,5 @@
+@font-face {
+  font-family: "Quicksand-Bold";
+  src: url("./Quicksand-Bold.woff") format("woff"),
+       url("./Quicksand-Bold.ttf") format("truetype");
+}

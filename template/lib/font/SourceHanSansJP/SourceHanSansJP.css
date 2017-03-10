@@ -1,0 +1,5 @@
+@font-face {
+  font-family: "SourceHanSansJP-Heavy";
+  src: url("./SourceHanSansJP-Heavy.woff") format("woff"),
+       url("./SourceHanSansJP-Heavy.otf") format("opentype");
+}
