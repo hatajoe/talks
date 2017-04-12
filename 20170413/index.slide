@@ -1,0 +1,149 @@
+dev-cloverlab/harbor
+Umeda.go #1
+13 Apr 2017
+Tags: libcompose, docker
+
+Yusuke Hatanaka
+@hatajoe
+
+* Topic
+
+- プルリク動作環境を自動構築する話
+
+* Intro
+
+- プルリクの動作環境が欲しいけど面倒
+- harbor使うとレポジトリへpushしたブランチの動作環境が得られる
+- 👨 実際に使うにはJenkinsなどのCIツールと組み合わせないと厳しい
+
+* Me
+
+.image hatajoe.png _ 300
+
+- [[https://github.com/hatajoe][hatajoe]] GitHub
+- [[https://twitter.com/hatajoe][@hatajoe]] Twitter
+- [[https://kug2.connpass.com/][#kug2]] [[https://gglt.connpass.com/][#gglt]]
+- working at Clover Lab.,inc.
+
+* dev-cloverlab/harbor
+
+[[https://github.com/dev-cloverlab/harbor][dev-cloverlab/harbor: harbor is API server manages the docker containers]]
+harborの管理ディレクトリ下にプロジェクトをデプロイするとプロジェクト内のdocker-compose.ymlを使ってコンテナを起動するだけ
+
+特徴
+
+- Go製のスタンドアローンAPIサーバー
+- コンテナ操作にlibcomposeを使用
+- ストレージにlevelDBを採用(単にシングルバイナリで動かしたかっただけ)
+
+* Demo
+
+* 準備と解説
+
+- レポジトリルートにdocker-compose.yml
+- 今回のデモは以下の構成
+
+    % tree
+    .
+    ├── docker-compose.yml
+    └── public
+        └── index.html
+    
+    1 directory, 2 files
+
+* 準備と解説
+
+docker-compose.yml
+
+    nginx:
+      image: nginx
+      ports:
+       - "${PORT1}:80"
+      volumes:
+        - ./public/:/usr/share/nginx/html/
+
+public/index.html
+
+    Hello, World!
+
+* 準備と解説
+
+デプロイをJenkinsの代わりにgit hooksで
+\.git/hooks/pre-push
+
+    HARBOR_DOMAIN=localhost:9999
+    PROJECT_NAME=umedago
+    BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    RES=`curl -XGET http://$HARBOR_DOMAIN/br?name=$PROJECT_NAME\&branch=$BRANCH`
+    WORK=`echo ${RES} | jq -r '.work'`
+    mkdir -p ${WORK}
+    rsync -rv --exclude=.git . ${WORK}
+    FLG=1
+    curl -XPOST -d "payload={\"name\":\"$PROJECT_NAME\", \"branch\":\"$BRANCH\"}" http://$HARBOR_DOMAIN/up
+    while [ $FLG == 1 ]
+    do
+    	sleep 1
+    	RES=`curl -XGET http://$HARBOR_DOMAIN/br?name=$PROJECT_NAME\&branch=$BRANCH`
+    	if [ $? == 0 ]; then
+    		STATE=`echo $RES | jq -r '.state'`
+    		if [ "$STATE" == "2" ]; then
+    			FLG=2
+    		fi
+    	fi
+    done
+
+* 準備と解説
+
+デプロイ〜コンテナ起動までの流れ
+
+- カレントブランチ名を取得
+- harborにブランチごとのデプロイ先を問い合わせ
+- デプロイ
+- harborにコンテナ起動を命ずる
+- harborにコンテナが起動したかどうかをポーリング
+
+* Demo
+
+- harbor起動
+- harborにプロジェクト登録
+- umedagoレポジトリのmasterをpush
+- 動作確認
+- umedagoレポジトリのfeatureブランチを作成しpush
+- 動作確認
+- 🎉
+
+* libcompose
+
+* libcompose:概要
+
+[[https://github.com/docker/libcompose][docker/libcompose: An experimental go library providing Compose-like functionality]]
+
+- docker-composeが使っているパッケージ
+- Go製なのでimportすれば使える
+- しかも簡単
+
+* libcompose:サンプル
+
+READMEから抜粋
+
+.code libcompose.sample.go /^func main/,/^}/
+
+* libcompose:与太話
+
+- [[https://github.com/docker/libcompose/issues/208][Support .env files for environment variables · Issue #208 · docker/libcompose]]
+- docker-compose1.7から対応している.envの読み込みはまだ非対応
+- 個人的にはlibcompose利用者が「あれば読む」を実装する方が良いかと思う
+
+* おまけ
+
+[[https://github.com/dev-cloverlab/carpenter][dev-cloverlab/carpenter: Carpenter is a tool to manage DB schema and data]]
+
+紹介資料
+
+- [[http://go-talks.appspot.com/github.com/hatajoe/kug2/20161127/index.slide#1][dev-cloverlab/carpenter]]
+- [[http://qiita.com/Hatajoe/items/256514d9f76dea04ef49][DBマイグレーションツール作った話 - Qiita]]
+- [[http://qiita.com/nownabe/items/1acce9f6b9f14f74c965][Go製マイグレーションツールまとめ - Qiita]]
+
+MySQLのテーブル間の構造とデータ差分のパッチを充てるツール
+harborと組み合わせるとDBも構築出来る
+
