@@ -1,5 +1,7 @@
 # talks
 
+- [ビヨンド勉強会 #12 - ゲーム開発の裏の裏を支えるGo活用事例](https://hatajoe.github.io/talks/20180517)
+- [Umeda.go #3 - React Native meets Go](http://go-talks.appspot.com/github.com/hatajoe/talks/20180224/index.slide#1)
 - [Umeda.go #3 - React Native meets Go](http://go-talks.appspot.com/github.com/hatajoe/talks/20180224/index.slide#1)
 - [Umeda.go #1 - dev-cloverlab/harbor](http://go-talks.appspot.com/github.com/hatajoe/talks/20170413/index.slide#1)
 - [激突！Aiming vs Clover Lab - Engineering Manager](https://hatajoe.github.io/talks/20170311)
