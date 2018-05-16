@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>ゲーム開発の裏の裏を支えるGo活用事例</title>
+
+		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+		<meta name="author" content="Hakim El Hattab">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="../template/css/reveal.css">
+		<link rel="stylesheet" href="../template/css/theme/cloverlab.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="../template/lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? '../template/css/print/pdf.css' : '../template/css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+
+				<section data-markdown>
+					<script type="text/template">
+						###### ビヨンド勉強会 #12
+						<br>
+						<br>
+						##### ゲーム開発の裏の裏を支える
+						# Go活用事例
+						<br>
+						#### *Yusuke Hatanaka* 
+						<br>
+						<img src="../template/lib/image/logo2.png" width="21%" />
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="light">
+					<script type="text/template">
+# about me
+## [<strong>@hatajoe</strong>](https://twitter.com/hatajoe)
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="light">
+					<script type="text/template">
+## [<strong>#umedago</strong>](https://umedago.connpass.com/)
+## [<strong>#osakaup</strong>](https://osaka-up.connpass.com/)
+## [<strong>#gglt</strong>](https://gglt.connpass.com/)
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="light">
+					<script type="text/template">
+## [<strong>Clover Lab.,Inc.</strong>](http://cloverlab.jp)
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="dark">
+					<script type="text/template">
+## <strong>技術部長@クローバーラボ</strong>
+###### ( なんちゃって )
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="light">
+					<script type="text/template">
+<img src="./Go-Logo_Aqua.png" width=640px>
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="light">
+					<script type="text/template">
+## <strong>Since Sep 28, 2014</strong>
+##### The first commit <strong>44026a2</strong> of our product using Go 🎉
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="light">
+					<script type="text/template">
+## <strong>Products</strong>
+
+* <strong>WanderCrown</strong>
+* bridgegate
+* carpenter
+* harbor
+* go-message-broadcaster
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="green">
+					<script type="text/template">
+# WanderCrown
+[wander-crown.com](http://wander-crown.com/)<br>
+###### <strong>2017年9月29日にサービス終了</strong>
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="light">
+					<script type="text/template">
+## WanderCrown
+
+* 💪 バックエンドは全てGo 
+* 🐘 元々PHPだったものをフルスクラッチで書き直した
+* 👀 100万行超え 
+* 👉 ORM層をコード生成によって解決してた
+* 👏 サーバーエンジニアは２名
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="light">
+					<script type="text/template">
+## ORM層の話
+
+* MySQL/Cassandra構成
+* 対応する構造体をタイピングで実装するのは厳しい
+* ジェネリクスは無いのでコード生成 [<strong>#gogenerate</strong>](https://blog.golang.org/generate)
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="dark">
+					<script type="text/template">
+## ゲームのWebAPIとGo
+
+* 🤔 Goでなければいけない理由は特に無い
+* 🏃 開発速度を求めるならRailsやLaravel
+* ❌ 対実行速度: レスポンスタイムの大部分がI/Oアクセス
+* ❌ 対並列処理: 1リクエスト内で並列処理を必要としない
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="light">
+					<script type="text/template">
+## <strong>Products</strong>
+
+* WanderCrown
+* <strong>bridgegate</strong>
+* carpenter
+* harbor
+* go-message-broadcaster
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="green">
+					<script type="text/template">
+# bridgegate
+dev-cloverlab/bridgegate
+###### <strong>モバイルゲームアプリケーション向け汎用プロキシ</strong>
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="light">
+					<script type="text/template">
+## <strong>Proxy</strong>
+
+```
+                                       \ \ \ \  / / / /
++--------+     +----+     +-------+     +------------+     +-----+
+| iPhone | --> | LB | --> | Nginx | --> | bridgegate | --> | app |
++--------+     +----+     +-------+     +------------+     +-----+
+                                       / / / /  \ \ \ \
+
+```
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="light">
+					<script type="text/template">
+## <strong>bridgegate</strong>
+
+* 🔑 ユーザー認証
+* 🍀 CloverID認証
+* 💵 課金レシートチェック
+* 👌 レスポンスキャッシュ
+* ⚠️  メンテナンスモード
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="green">
+					<script type="text/template">
+## <strong>便利</strong>
+
+* Go製のサーバーにミドルウェアとして組み込める
+* スタンドアロンなサーバーバイナリとしても提供
+* 信頼と安心の社内全案件で導入済み
+* 残念ながらprivateリポジトリ
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="light">
+					<script type="text/template">
+## <strong>Products</strong>
+
+* WanderCrown
+* bridgegate
+* <strong>carpenter</strong>
+* harbor
+* go-message-broadcaster
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="green">
+					<script type="text/template">
+###### The 1st our OSS product 🏅
+# carpenter
+<br>
+[dev-cloverlab/carpenter](https://github.com/dev-cloverlab/carpenter)
+###### <strong>MySQL/MariaDB用のDBマイグレーションツール</strong>
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="light">
+					<script type="text/template">
+## carpenter
+
+```
+carpenterは、スキーマ情報、テーブル情報をJSONにシリアライズし、別のDBに対して差分SQLを発行して実行までしちゃうやつ。また、データのシード機能もあって、対象のテーブルデータをCSVにシリアライズし、別のテーブルに対して差分SQLを発行して実行までしちゃう。シードはマスターデータ反映に利用。carpenterを利用することで、ブランチごとにDBを復元できるので大変便利。元々はGoのstructにアノテーションコメントを書けばDBをその状態にするツールだった。僕が違う案件に移ってGo案件じゃなくなったので汎用的に使えるように改良したのが現バージョン。社内の全案件で導入済み。
+```
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="light">
+					<script type="text/template">
+## carpenter
+
+- テーブル構造をJSONシリアライズ
+- データをCSVシリアライズ
+- これらのシリアライズデータと別環境の<strong>差分SQL</strong>を生成
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="light">
+					<script type="text/template">
+## carpenter
+
+```
+     ALTER TABLE `table` DROP COLUMN first_name;
+     ALTER TABLE `table` DROP COLUMN last_name;
+     ALTER TABLE `table` ADD COLUMN name VARCHAR(255);
+
++----+------+-------+ -------->> +----+------------+-----------+-------+
+| id | name | email |            | id | first_name | last_name | email |
++----+------+-------+ <<-------- +----+------------+-----------+-------+
+
+     ALTER TABLE `table` DROP COLUMN name;
+     ALTER TABLE `table` ADD COLUMN first_name VARCHAR(255);
+     ALTER TABLE `table` ADD COLUMN last_name VARCHAR(255);
+```
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="light">
+					<script type="text/template">
+## carpenter
+
+- シリアライズしたJSONやCSVをリポジトリへPush
+- CIが自動でそのブランチのDBを復元
+- データはマスターデータのみに適用
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="light">
+					<script type="text/template">
+## <strong>PR welocome! 🤝</strong>
+<a href="https://github.com/dev-cloverlab/carpenter/pull/32"><img src="./pr.png" width="60%" /></a>
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="light">
+					<script type="text/template">
+## <strong>🌟 Give us the Star 🌟</strong>
+<img src="./star.png" />
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="light">
+					<script type="text/template">
+## <strong>Products</strong>
+
+* WanderCrown
+* bridgegate
+* carpenter
+* <strong>harbor</strong>
+* go-message-broadcaster
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="green">
+					<script type="text/template">
+###### The 2nd our OSS product 🥈
+# harbor
+<br>
+[dev-cloverlab/harbor](https://github.com/dev-cloverlab/harbor)
+###### <strong>プルリクエストの検証環境を自動で構築するサーバーアプリケーション</strong>
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="light">
+					<script type="text/template">
+## harbor
+
+- libcomposeを使ってAPI経由でdocker-compose up
+- GitHub 👉 Jenkins 👉 <strong>harbor</strong> 👉 検証環境出来上がり👶
+- 事前登録サイトや公式サイトなどの簡単なWebページ用
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="light">
+					<script type="text/template">
+## [src-d/go-git](https://github.com/src-d/go-git)
+
+<a href="https://github.com/src-d/go-git/pull/302"><img src="./contribute.png" /></a>
+
+- 当初はJenkinsを使わず<strong>harborがgit pull</strong>する仕様
+- その過程でgo-gitにコントリビュート出来たのは良体験
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="light">
+					<script type="text/template">
+## プルリクとスターを😉
+##### ( ただし、harborは作り込みが甘い。。 )
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="light">
+					<script type="text/template">
+## <strong>Products</strong>
+
+* WanderCrown
+* bridgegate
+* carpenter
+* harbor
+* <strong>go-message-broadcaster</strong>
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="green">
+					<script type="text/template">
+###### The 3rd our OSS product 🥉
+## go-message-broadcaster
+<br>
+[dev-cloverlab/go-message-broadcaster](https://github.com/dev-cloverlab/go-message-broadcaster)
+###### <strong>サーバーに接続中の全クライアントにメッセージをブロードキャスト</strong>
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="light">
+					<script type="text/template">
+## go-message-broadcaster
+<br>
+###### 以下を満たすインターフェースであれば何であっても<strong>ブロードキャスト</strong>
+
+```go
+type Conn interface {
+	SendMessage(*ResponseMessage) error
+	SendEvent(*EventMessage) error
+	Receive() (*RequestMessage, error)
+	Close() error
+}
+```
+					</script>
+				</section>
+
+				<section data-markdown data-background-type="light">
+					<script type="text/template">
+## go-message-broadcaster
+<br>
+* サーバー側にメッセージ毎の<strong>ハンドラー</strong>を設定出来る
+* ブロードキャスト先は<strong>ハンドラー</strong>内で自由に設定が可能
+* <strong>リアルタイム性</strong>の高いゲーム向けに作った
+* リポジトリには<strong>WebSocketのサンプル</strong>を置いてる
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="light">
+					<script type="text/template">
+## go-message-broadcaster
+Architecture
+```
+                             +----------+
+                             | handlers |
+                             +----------+
+                                ^    |
+                                |    v
+                              +--------+
+                    +- msg -->| server |-- msg --+
+                    |         +--------+         |
+                    |                            |
+                    |   +----------+-------------+
+                    |   |          |             |
+                    |   v          v             v
+                 +---------+  +---------+  +---------+
+                 | client1 |  | client2 |  | client3 |
+                 +---------+  +---------+  +---------+
+```
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="dark">
+					<script type="text/template">
+## これは裏話なんだけど
+
+全チームで利用するプロダクトを作る場合、そのメンテナンスコストは結構バカにならないことを理解しておいた方が良い。
+この手のプロダクトを案件で本体のコード書きながらメンテしたい人は稀な存在であり、実際は誰も自らメンテナンスを名乗り出るわけでもなく、バグ報告や要望だけが来る日々が続く。これはメンタル的に結構ツライ。<br>
+僕はGoを書くのもコードを書くのも好きだから言うほど辛くはないが、自分が忙しく対応が難しいときに問題が発生するというリスクは常にある。
+###### （でも最近ようやく１名協力してくれる人が現れた😂）
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="light">
+					<script type="text/template">
+## ゲーム開発とGo
+
+- 👌 ピンポイント的な使い所はあちこちにある
+- 🖐 WebAPI実装ついては他に良い選択肢があると思う
+- 🛠 ちょっとした個人的なツールは全てGoで書いてる
+- ☺️  OSを気にすること無く実行ファイルを配れる
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="light">
+					<script type="text/template">
+## OSSにする意味
+
+- 我々の思想やマインドを<strong>世界にアピール</strong>したい
+- 世界中の<strong>優れたエンジニアと繋がりたい</strong>
+- まだまだまったく満足した活動にはなっていない
+- 社内に共感出来る人を増やして行きたい
+- <strong>もっと便利なもの</strong>を作りたい
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="light">
+					<script type="text/template">
+## <strong>クローバーラボとGo</strong>
+
+クローバーラボではこれからも<strong>Go</strong>を使っていく<br>
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="light">
+					<script type="text/template">
+ちなみに、Go以外のOSSもあるよ！
+<br>
+[<strong>github.com/dev-cloverlab</strong>](https://github.com/dev-cloverlab?utf8=%E2%9C%93&q=&type=public&language=)
+					</script>
+				</section>
+
+                <section data-markdown data-background-type="green">
+					<script type="text/template">
+## ご静聴ありがとうございました
+					</script>
+				</section>
+
+				<div id="footer">Copyright © Clover Lab.,inc. All Rights Reserved.</div>
+			</div>
+
+		</div>
+
+		<script src="../template/lib/js/head.min.js"></script>
+		<script src="../template/js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: '../template/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: '../template/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '../template/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '../template/plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: '../template/plugin/zoom-js/zoom.js', async: true },
+					{ src: '../template/plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
