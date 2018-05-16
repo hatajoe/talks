@@ -1,0 +1,182 @@
+React Native meets Go
+Umeda.go #3
+24 Feb 2018
+Tags: gomobile,WebSocket
+
+Yusuke Hatanaka
+Software Engineer, Clover Lab.,inc.
+https://medium.com/@hatajoe
+@hatajoe
+
+* About me
+
+Yusuke Hatanaka
+
+- [[https://github.com/hatajoe][hatajoe]] - GitHub
+- [[https://twitter.com/hatajoe][@hatajoe]] - Twitter
+- [[https://medium.com/@hatajoe][@hatajoe]] - Medium
+- [[https://umedago.connpass.com/][#umedago]] [[https://osaka-up.connpass.com/][#osakaup]] [[https://gglt.connpass.com/][#gglt]]
+- working at [[https://cloverlab.jp][Clover Lab.,inc.]] and [[https://kiizan-kiizan.co.jp][Kiizan Kiizan.,inc.]]
+
+* Introduction
+
+.image https://isomorphicgo.org/images/ig_racer_social.png
+.caption Isomorphic Go - Kamesh Balasubramanian
+
+It all started when I read the book [[https://isomorphicgo.org/]["Isomorphic Go"]]
+It has a concept that the web server and the web browser (the client), may share all.
+On the other hand, how about a native application?
+This is motivation.
+
+* Overview
+
+I introduce two example applications:
+
+- how to incorporate Go into React Native.
+- how to bridge the data through the Go and React native.
+
+Note: Sorry I can mention only for Android yet.
+
+* React Native meets Go
+
+* React Native - Native Modules
+
+[[https://facebook.github.io/react-native][React Native - A framework for building native apps using React]]
+
+We can use that was also unsupported native API if we implement it yourself.
+See also:
+
+- [[https://facebook.github.io/react-native/docs/native-modules-ios.html][iOS]]
+- [[https://facebook.github.io/react-native/docs/native-modules-android.html][Android]]
+
+Thus we can use packages that adapted to mobile OS by gomobile.
+
+   % yarn global add react-native-cli
+
+* gomobile
+
+[[https://github.com/golang/mobile][Go on Mobile]]
+gomobile can make iOS/Android native binary from Go code.
+
+    % go get golang.org/x/mobile/cmd/gomobile
+    % gomobile init
+
+* but, Why Go?
+
+* We love Go, isn't it?
+
+.image https://golang.org/doc/gopher/frontpage.png
+.caption https://golang.org/
+
+* Pros.
+
+- Go has powerful standard libraries.
+- Most of those seem to work properly on each mobile platform, by using gomobile.
+- Go is strongly typed and has readability and concurrency advantage.
+- Isomorphic.
+
+* Simple example - How to incorporate them
+
+* hello - React Native meets Go example
+
+[[https://github.com/hatajoe/react-native-gomobile-example][hatajoe/react-native-gomobile-example]]
+[[https://github.com/hatajoe/hello][hatajoe/hello]]
+
+* bind a library for mobile OS from Go code
+
+.code hello/hello.go
+
+.code hello/Makefile
+
+* make bridge class in Java
+
+.code hello/HelloModule.java
+
+* use bridge class by NativeModule of React Native
+
+.code hello/App.js
+
+* Note:
+
+if you have problems, see my blog post:
+[[https://medium.com/@hatajoe/using-native-module-that-built-by-gomobile-on-react-native-76d21006a48][Using native module that built by gomobile on React Native]]
+
+* More complexity example - How to bridge them
+
+* hey - Sample Messaging App 
+
+[[https://github.com/hatajoe/hey][hatajoe/hey]]
+[[https://github.com/hatajoe/hey-client][hatajoe/hey-client]]
+
+* Architecture
+
+    +----+     +----+     +-----+     +------+
+    | JS | <-> | V8 | <-> | JNI | <-> | Java |
+    +----+     +----+     +-----+     +------+
+
+Argument types:
+
+    Boolean -> Bool
+    Integer -> Number
+    Double -> Number
+    Float -> Number
+    String -> String
+    Callback -> function
+    ReadableMap -> Object
+    ReadableArray -> Array
+
+React Native convey the data in each layer with Callbacks and Events.
+
+* bridge class - Callbacks example
+
+.code callback.java
+
+* use bridge class - Callbacks example
+
+.code callback.js
+
+Note:
+
+- A native module is supposed to invoke its callback only once.
+- The callback is not invoked immediately after the native function completes - remember that bridge communication is asynchronous.
+
+* Go - Events example
+
+.code hey/hey.go
+
+* Java - Events example
+
+.code hey/HeyModule.java
+
+* JS - Events example
+
+.code hey/App.js
+
+* The server
+
+Of course also the server is Go, using [[https://github.com/dev-cloverlab/go-message-broadcaster][dev-cloverlab/go-message-broadcaster]]
+
+go-message-broadcaster is bidirectional message communication middleware that composed on server-client architecture.
+
+.code broadcaster/arch.txt
+
+* Example - dev-cloverlab/go-meesage-broadcaster
+
+.code broadcaster/conn.go
+
+.code broadcaster/main.go
+
+* Isomorphic
+
+The same data type on server and client.
+
+.code broadcaster/message.go
+
+* Conclusion
+
+- Working stable
+- Easy for use (than I thought)
+- Isomorphic is awesome
+- It is difficult to isolate the problem
+- Read the docs carefully
+
