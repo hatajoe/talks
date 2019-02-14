@@ -1,0 +1,69 @@
+Go 1.12 Release Party 
+Umeda.go w/ GoCon Tokyo, Fukuoka.go
+15 Feb 2019
+Tags: go,osaka,japan
+
+Yusuke Hatanaka
+@hatajoe
+
+* G0 1.12 RC1
+
+.image gopher.png _ 300
+
+[[https://groups.google.com/forum/#!msg/golang-announce/r0R2jijOjBo/Egi-Q4uWGQAJ][Go 1.12 RC1 Announcement]]
+
+[[https://tip.golang.org/doc/go1.12][Go 1.12 Draft Release Note]]
+"Go 1.12 is not yet released. These are work-in-progress release notes. Go 1.12 is expected to be released in February 2019."
+
+
+* Umeda.go
+
+.image umeda.png _ 300
+
+- 2/15 2019 👉[[https://umedago.connpass.com/event/119739/][Go 1.12 Release Party in Umeda w/ Tokyo, Fukuoka]]
+- 1/18 2019 [[https://umedago.connpass.com/event/112449/][Umeda.go 2018 Winter]]
+- 10/5 2018 [[https://umedago.connpass.com/event/98745/][Umeda.go 2018 Autumn]]
+- 2/24 2018 [[https://umedago.connpass.com/event/76440/][Umeda.go #3]]
+- 7/7  2017 [[https://umedago.connpass.com/event/57508/][Umeda.go #2 + KUG2]]
+- 4/13 2017 [[https://umedago.connpass.com/event/53002/][Umeda.go #1 / Shinjyuku.go #1]]
+
+* Thanks 🎉
+
+.image tokyo-fukuoka.png _ 500
+
+Thank you for inviting us, Tokyo/Fukuoka!
+
+- [[https://gocon.connpass.com/event/118022/][Go 1.12 Release Party in Tokyo]]
+- [[https://fukuokago.connpass.com/event/118377/][Go 1.12 Release Party in Fukuoka]]
+
+* Today
+
+- 19:00 - 19:30	Open
+- 19:30 - 19:40	What's new Go1.12? by tenntenn
+- 19:40 - 20:00	Creating a lint tool with analysis by knsh14
+- 20:00 - 20:20	Go Modules in 2019 by budougumi0617
+- 20:20 - 20:30	Break
+- 20:30 - 20:50	Goならわかるシステムプログラミング初版3刷の改訂について by shibu_jp
+- 20:50 - 21:10	LSP by monochromegane (from Fukuoka.go)
+- 21:10 - 21:40	After Party
+
+* Venue
+
+.image floor.png _ 500
+
+Thank you Aiming Inc!
+
+* One more thing...
+
+.image umeda.png _ 300
+
+Umeda.go 2019 Spring is held in April 20th 2019 🙌
+Coming soon.
+
+* Cheers 🍻
+
+[[https://twitter.com/search?f=tweets&vertical=default&q=%23go112party&src=typd][#go112party]]
+[[https://twitter.com/search?f=tweets&vertical=default&q=%23umedago&src=typd][#umdago]]
+
+
+
