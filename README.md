@@ -1,5 +1,6 @@
 # talks
 
+- [Go 1.12 Release Party in Umeda - Opening Slide](http://go-talks.appspot.com/github.com/hatajoe/talks/20190215/index.slide#1)
 - [Umeda.go 2018 Autumn - Opening Slide](http://go-talks.appspot.com/github.com/hatajoe/talks/20181005/index.slide#1)
 - [ビヨンド勉強会 #12 - ゲーム開発の裏の裏を支えるGo活用事例](https://hatajoe.github.io/talks/20180517)
 - [Umeda.go #3 - React Native meets Go](http://go-talks.appspot.com/github.com/hatajoe/talks/20180224/index.slide#1)
