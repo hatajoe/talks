@@ -1,0 +1,69 @@
+sync.Pool
+Umeda.go 2019 Spring
+20 Apr 2019
+Tags: go,osaka,japan
+
+Yusuke Hatanaka
+@hatajoe
+
+* About me
+
+[[https://twitter.com/hatajoe][@hatajoe]] at [[https://www.freee.co.jp/][freee K.K.]]
+
+.image freee.png _ 600
+
+* Why you should like sync.Pool?
+
+written by [[https://medium.com/@Mnwa][Mnwa Mnowich]] in [[https://medium.com/@Mnwa/why-you-should-like-sync-pool-2c7960c023ba][Medium]] at Apr 18
+
+.image medium.png _ 800
+
+> Because it’s fast.
+> x4982 reducing memory usage.
+
+* sync.Pool
+
+.image 1.png _ 700
+
+- GCされる前に再利用されるなら有効で、goroutineセーフである
+- Go1.3以降の fmtパッケージで採用されている
+- これは例えばAPIサーバーのJSONエンコードとも相性が良い
+
+* usage
+
+.image 2.png _ 700
+
+* Encoding json to the bytes.Buffer
+
+.image 3.png
+
+* using sync.Pool
+
+.image 4.png
+
+* benchmark
+
+.image 5.png
+
+- 44% performance boost and save very-very much memory (160B/ops vs 0B/ops)
+- [[https://github.com/Mnwa/GoBench/blob/master/sync/pool/buffer_pool_test.go][benchmark code is here]]
+
+* x4982 reducing memory usage?
+
+.image 6.png
+
+* using sync.Pool
+
+.image 7.png
+
+* benchmark
+
+.image 8.png
+
+* conclusion
+
+- サイズが不明なものに対するメモリ確保は往々にして余分なメモリ確保が行われる
+- sync.Poolを使うことでgoroutine間で確保済みメモリを安全に使い回せる
+- arbitrationコストは多少ありそう
+
+
