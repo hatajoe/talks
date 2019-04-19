@@ -60,6 +60,9 @@ written by [[https://medium.com/@Mnwa][Mnwa Mnowich]] in [[https://medium.com/@M
 
 .image 8.png
 
+- x45 performance boost and x4982 reduced memory usage
+- [[https://github.com/Mnwa/GoBench/blob/master/sync/pool/gzip_pool_test.go][benchmark code is here]]
+
 * conclusion
 
 - サイズが不明なものに対するメモリ確保は往々にして余分なメモリ確保が行われる
