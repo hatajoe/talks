@@ -1,0 +1,72 @@
+Umeda.go 2019 Spring
+20 Apr 2019
+Tags: go,osaka,japan
+
+Yusuke Hatanaka
+@hatajoe
+
+* Welcome🎉
+
+.image umeda.png 
+
+* This is the 7th
+
+- 4/20 2019 👉[[https://umedago.connpass.com/event/122201/][Umeda.go 2019 Spring]]
+- 2/15 2019 [[https://umedago.connpass.com/event/119739/][Go 1.12 Release Party in Umeda w/ Tokyo, Fukuoka]]
+- 1/18 2019 [[https://umedago.connpass.com/event/112449/][Umeda.go 2018 Winter]]
+- 10/5 2018 [[https://umedago.connpass.com/event/98745/][Umeda.go 2018 Autumn]]
+- 2/24 2018 [[https://umedago.connpass.com/event/76440/][Umeda.go #3]]
+- 7/7  2017 [[https://umedago.connpass.com/event/57508/][Umeda.go #2 + KUG2]]
+- 4/13 2017 [[https://umedago.connpass.com/event/53002/][Umeda.go #1 / Shinjyuku.go #1]]
+
+* Twitter & Slack
+
+Twitter
+
+[[https://twitter.com/umedago][@umedago]]
+
+公式アカウントのフォローをお願いします。
+随時イベント情報をお知らせいたします。
+
+Slack
+
+[[https://invite.slack.golangbridge.org/][Gophers Slack #osaka]]
+
+Umeda.go や Go に関して初心者からベテランまで気軽に質問できる場です。
+ぜひ気軽に参加してなにかポストしてみて下さい。
+
+* Talks
+
+- 13:35 Talk1: こわくないGo Modules by [[https://twitter.com/@_NANASI880][@_NANASI880]]
+- 14:00 Talk2: Go並行処理やり直し by [[https://twitter.com/@kumatch][@kumatch]]
+- 14:25 Short Break
+- 14:35 Talk3: Serverless Go! by [[https://twitter.com/@White_Raven777][@White_Raven777]]
+- 15:00 Talk4: TinyGoでIoTを始めよう by [[https://twitter.com/@nobonobo][@nobonobo]]
+- 15:25 Short break
+
+* LTs
+
+- 15:40 LT × 6
+- sync.Pool by [[https://twitter.com/@hatajoe][@hatajoe]]
+- 依存方向のあるworkerを管理する by [[https://twitter.com/@taxio_tech][@taxio_tech]]
+- プログラミング初心者がGoを使い始めてからの3年を振り返る by [[https://twitter.com/@tsun_0002][@tsun_0002]]
+- Go良い感じに詰めて整形してくれる JSON pretty-printer「jpp」を作りました by [[https://github.com/tanishiking][tanishiking]]
+- 最近変わった開発時のあれこれを5分で by [[https://github.com/lufia][lufia]]
+- GoならわかるGIF by [[https://twitter.com/@decafe09][@decafe09]]
+
+* after event
+
+- 16:40 クロージング & 買い出し
+- 17:00 懇親会
+- 18:45 撤収
+
+* Venue
+
+.image floor.png _ 500
+
+Thank you Aiming Inc!
+
+* hashtag
+
+[[https://twitter.com/search?f=tweets&vertical=default&q=%23umedago&src=typd][#umdago]]
+
