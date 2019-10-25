@@ -1,0 +1,113 @@
+自分でビルドしたGoを使う
+Umeda.go 2019 Autumn
+25 Oct 2019
+Tags: go,osaka,japan
+
+Yusuke Hatanaka
+@hatajoe
+
+* About me
+
+[[https://twitter.com/hatajoe][@hatajoe]] at [[https://www.freee.co.jp/][freee K.K.]]
+
+* みなさん、毎朝 Go ビルドしてますか？
+
+* 私はしてません
+
+* Go をソースコードからビルドする
+
+GoはGoをGoを使ってビルドします。何言ってんのって感じですが本当です。
+なので、最新の Go をビルドするためには Go1.4 のソースコードが必要になります。
+デフォルトでは ~/go1.4/bin にGo実行ファイルがあるという前提でビルドが進みます。
+
+Goを自分でビルドして何が嬉しいのかというと、何も嬉しくありません。別に嬉しいとかじゃないんですね。
+でも気になったPRとかチェックアウトしてみてよくわからんけどふ〜んって出来ると思います。あまりやりません。
+
+* Go のバージョンをよしなに切り替える
+
+go-env という面白いツールを作っている人が居ます。
+
+.link https://github.com/nanasi880/go-env
+
+* go-env
+
+go-env を一言で説明すると、環境変数で実行するGoバイナリを切り替えるというシンプルなツールです。
+環境変数で切り替えられるので、direnvと組み合わせて使うとディレクトリごとに Goバージョンが切り替えられます。
+ただし、様々なバージョンのGoバイナリをインストールするみたいな便利機能は一切付属していないストロングスタイルです。
+
+* go-env
+
+go-env をビルドすると go というバイナリが作られるので、それをパスの通ったところへ配置します。
+次に、GOENV_LOCATION という環境変数に goX.X.X という名前の Goバイナリが配置されているパスをセットします。
+すると、GOCMD という環境変数にセットされている goX.X.X が使われる、という寸法です。
+もし GOCMD がセットされていない場合は、.gitと同じパスに置いてある.go-version を読みます。
+それも無ければ GOENV_LOCATION に置いてあるセマンティックバージョニングにおける最新が使用されます。
+
+* 自分でビルドしたGoのバージョンを無意識に切り替える例
+
+- 環境変数を設定する
+- go1.4のビルド
+- Go リポジトリをクローンする
+- gorootの作成
+- 好きなバージョンのGoをビルドする
+- go-env をビルドする
+- ビルドした Go のシンボリックリンクを作成する
+
+* 環境変数を設定する
+
+	export GOPATH=/Users/hatajoe/go
+	export PATH=$GOPATH/bin:$PATH
+
+* go1.4のビルド
+
+.link https://dl.google.com/go/go1.4-bootstrap-20171003.tar.gz
+
+	% ls ~/ | grep go
+	go
+	go1.4
+
+	% cd ~/go1.4/src
+	% CGO_ENABLED=0 ./make.bash
+
+~/go1.4/bin/go が作成されるはずです。
+
+* Go リポジトリをクローンする
+
+	% cd /usr/local
+	% sudo git clone git@github.com:hatajoe/go
+	% sudo chown -R hatajoe:admin go
+
+* gorootの作成
+
+次は、各バージョンのGoをビルドするところを作ります。
+
+	% sudo mkdir /usr/local/goroot
+	% cd /usr/local/go
+
+* 好きなバージョンのGoをビルドする
+
+	% git checkout go1.12.5
+	% git worktree add ../goroot/go1.12.5 go1.12.5
+	% cd /usr/local/goroot/go1.12.5/src
+	% ./make.bash
+
+すると /usr/local/goroot/go1.12.5/bin/go が出来上がるはずです。これが温かみの産物です。
+
+* go-env をビルドする
+
+	% mkdir ~/go/src/github.com/nanasi880
+	% cd ~/go/src/github.com/nanasi880
+	% git clone git@github.com:nanasi880/go-env
+	% cd go-env/go
+	% /usr/local/goroot/go1.12.5/bin/go build .
+
+go というバイナリが出来上がるはずです。強い。
+
+	% mv ~/go/src/github.com/nanasi880/go-env/go/go /usr/local/bin
+	% export GOENV_LOCATION=/usr/local/bin
+
+* ビルドした Go のシンボリックリンクを作成する
+
+	% ln -s /usr/local/goroot/go1.12.5/bin/go /usr/local/bin/go1.12.5
+
+* 簡単なDemo
