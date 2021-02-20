@@ -1,5 +1,6 @@
 # talks
 
+- [Kyoto.go remote #17 Discord LT会 - parsing mixed format JSON](http://go-talks.appspot.com/github.com/hatajoe/talks/20210221/index.slide)
 - [Umeda.go 2020 online - ADD TEST FOR EXISTING PROJECT](https://docs.google.com/presentation/d/12td0yvGdMGJxClFwEm_AzdgdHwqcUSoYfubR02wjlcQ/edit#slide=id.p)
 - [Umeda.go 2019 Spring LT - sync.Pool](http://go-talks.appspot.com/github.com/hatajoe/talks/20190420/index.slide#1)
 - [Umeda.go 2019 Spring - Opening Slide](http://go-talks.appspot.com/github.com/hatajoe/talks/20190420/opening.slide#1)
