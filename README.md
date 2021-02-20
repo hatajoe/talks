@@ -1,7 +1,7 @@
 # talks
 
-- [ADD TEST FOR EXISTING PROJECT - Umeda.go 2020 online](https://docs.google.com/presentation/d/12td0yvGdMGJxClFwEm_AzdgdHwqcUSoYfubR02wjlcQ/edit#slide=id.p)
-- [sync.Pool - Umeda.go 2019 Spring LT](http://go-talks.appspot.com/github.com/hatajoe/talks/20190420/index.slide#1)
+- [Umeda.go 2020 online - ADD TEST FOR EXISTING PROJECT](https://docs.google.com/presentation/d/12td0yvGdMGJxClFwEm_AzdgdHwqcUSoYfubR02wjlcQ/edit#slide=id.p)
+- [Umeda.go 2019 Spring LT - sync.Pool](http://go-talks.appspot.com/github.com/hatajoe/talks/20190420/index.slide#1)
 - [Umeda.go 2019 Spring - Opening Slide](http://go-talks.appspot.com/github.com/hatajoe/talks/20190420/opening.slide#1)
 - [Go 1.12 Release Party in Umeda - Opening Slide](http://go-talks.appspot.com/github.com/hatajoe/talks/20190215/index.slide#1)
 - [Umeda.go 2018 Autumn - Opening Slide](http://go-talks.appspot.com/github.com/hatajoe/talks/20181005/index.slide#1)
