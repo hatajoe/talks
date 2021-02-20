@@ -1,0 +1,19 @@
+{
+  "type": "message",
+  "subtype": "bot_message",
+  "text": "",
+  "ts": "1458413482.000011",
+  "bot_id": "B0U0BK8TA",
+  "attachments": [
+    {
+      "fallback": "[message-subscriber] New branch \"<https://github.com/hatajoe/message-subscriber/tree/add-coveralls|add-coveralls>\" was pushed by hatajoe",
+      "text": "[message-subscriber] New branch \"<https://github.com/hatajoe/message-subscriber/tree/add-coveralls|add-coveralls>\" was pushed by hatajoe",
+      "id": 1,
+      "color": "4183C4",
+      "mrkdwn_in": [
+        "text",
+        "pretext"
+      ]
+    }
+  ]
+}

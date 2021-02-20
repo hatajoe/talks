@@ -1,0 +1,32 @@
+[
+  {
+    "type": "message",
+    "subtype": "bot_message",
+    "text": "",
+    "ts": "1458411807.000008",
+    "bot_id": "B0TVCS8FN",
+    "attachments": [
+      {
+        "fallback": "Hello from CircleCI",
+        "text": "Hello from CircleCI",
+        "id": 1,
+        "color": "AAAAAA"
+      }
+    ]
+  },
+  {
+    "type": "message",
+    "subtype": "bot_message",
+    "text": "",
+    "ts": "1458422845.000021",
+    "bot_id": "B0TVCS8FN",
+    "attachments": [
+      {
+        "fallback": "Success:  hatajoe's build (<https://circleci.com/gh/hatajoe/message-subscriber-runner/26|#26>; push in <https://circleci.com/gh/hatajoe/message-subscriber-runner|hatajoe/message-subscriber-runner> (<https://circleci.com/gh/hatajoe/message-subscriber-runner/tree/master|master>)\n - Add godoc badge (<https://github.com/hatajoe/message-subscriber-runner/commit/4ca0a5050fef5d036c00cdae164b984583c446fa|4ca0a50> by hatajoe)\n",
+        "text": "Success:  hatajoe's build (<https://circleci.com/gh/hatajoe/message-subscriber-runner/26|#26>; push in <https://circleci.com/gh/hatajoe/message-subscriber-runner|hatajoe/message-subscriber-runner> (<https://circleci.com/gh/hatajoe/message-subscriber-runner/tree/master|master>)\n - Add godoc badge (<https://github.com/hatajoe/message-subscriber-runner/commit/4ca0a5050fef5d036c00cdae164b984583c446fa|4ca0a50> by hatajoe)\n",
+        "id": 1,
+        "color": "41aa58"
+      }
+    ]
+  }
+]

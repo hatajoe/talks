@@ -1,0 +1,39 @@
+parsing mixed format JSON
+kyoto.go LT
+21 Feb 2021
+Tags:
+
+Yusuke Hatanaka
+SRE, freee K.K.
+hatajoe@hey.com
+https://github.com/hatajoe
+@hatajoe
+
+* JSON パースします
+
+* こんなの
+
+.image ./iru.png
+
+* こうしたい
+
+	YYYY-MM-DD HH:MM:SS ${SERVICE} ${MESSAGE}
+	YYYY-MM-DD HH:MM:SS ${SERVICE} ${MESSAGE}
+	YYYY-MM-DD HH:MM:SS ${SERVICE} ${MESSAGE}
+	YYYY-MM-DD HH:MM:SS ${SERVICE} ${MESSAGE}
+	YYYY-MM-DD HH:MM:SS ${SERVICE} ${MESSAGE}
+	YYYY-MM-DD HH:MM:SS ${SERVICE} ${MESSAGE}
+	YYYY-MM-DD HH:MM:SS ${SERVICE} ${MESSAGE}
+
+* こういうのはいらない
+
+.image ./iranai.png
+
+* やってみる
+
+.link 1min ながめる
+.link 2min しわける
+.link 3min 実装する
+.link 4min 考える
+.link 5min こうなる
+

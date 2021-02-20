@@ -1,0 +1,38 @@
+{
+  "type": "message",
+  "subtype": "bot_message",
+  "text": "Coverage remained the same on *hatajoe/message-subscriber-runner* _master_ at *69.048%*",
+  "ts": "1458660820.000006",
+  "username": "Coveralls",
+  "icons": {
+    "image_48": "https://s3-us-west-2.amazonaws.com/slack-files2/bot_icons/2016-03-19/28023142247_48.png"
+  },
+  "bot_id": "B0U0D9473",
+  "attachments": [
+    {
+      "fallback": "Coverage remained the same on *hatajoe/message-subscriber-runner* _master_ at *69.048%*",
+      "id": 1,
+      "thumb_height": 18,
+      "thumb_width": 86,
+      "thumb_url": "https://s3.amazonaws.com/assets.coveralls.io/badges/coveralls_69.png",
+      "color": "36a64f",
+      "fields": [
+        {
+          "title": "Change",
+          "value": "0.0%",
+          "short": true
+        },
+        {
+          "title": "Details",
+          "value": "<https://coveralls.io/builds/5505437>",
+          "short": true
+        },
+        {
+          "title": "Commit on \"master\"",
+          "value": "Add godoc badge\n- Yusuke Hatanaka @ 22 Mar 15:33",
+          "short": false
+        }
+      ]
+    }
+  ]
+}

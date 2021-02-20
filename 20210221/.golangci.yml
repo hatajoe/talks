@@ -1,0 +1,34 @@
+linters:
+  enable:
+    - bodyclose
+    - deadcode
+    - dogsled
+    - errcheck
+    - gocyclo
+    - goimports
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
+run:
+  timeout: 5m
+issues:
+  exclude-use-default: false
+  exclude-rules:
+    - text: "G204: Subprocess launch(ed with (variable|function call)|ing should be audited)"
+      linters:
+        - gosec
+    - text: "(G301|G302): (Expect directory permissions to be 0750 or less|Expect file permissions to be 0600 or less)"
+      linters:
+        - gosec
+    - text: "G304: Potential file inclusion via variable"
+      linters:
+        - gosec
